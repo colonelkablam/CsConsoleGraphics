@@ -4,8 +4,8 @@ namespace consoleGraphicsDriver
 {
     internal class Program
     {
-        static int winW = Console.WindowWidth - 5;
-        static int winH = Console.WindowHeight - 2;
+        static int winW = Console.WindowWidth - 7;
+        static int winH = Console.WindowHeight - 3;
 
         static public int GetWinH()
         {
@@ -22,19 +22,30 @@ namespace consoleGraphicsDriver
             Vector gravity = new Vector(0, 0.01);
             Vector wind = new Vector(0.001, 0);
 
-            // make a blob objects
+            // make blob objects
             Point[] blobs = new Point[10];
             Random r = new Random();
             for (int i = 0; i < blobs.Length; i++)
             {
-                double xV = r.Next(5, Console.WindowWidth - 5);
-                double yV = r.Next(1, Console.WindowHeight - Console.WindowHeight / 2);
-                blobs[i] = new Point(xV, yV, $"{i}");
+                double xPos = r.Next(5, winW - 5);
+                double yPos = r.Next(1, winH - winH / 2);
+                blobs[i] = new Point(xPos, yPos, $"{i}");
             }
 
-            // make a square obj
-            Square block1 = new Square(40, 5, "#", 6, 3, true);
-            Square block2 = new Square(20, 5, "@", 7, 4, false);
+            // make square objects
+            Square[] blocks = new Square[6];
+            for (int i = 0; i < blocks.Length; i++)
+            {
+                double xPos = r.Next(10, winW - 10);
+                double yPos = r.Next(1, winH - winH / 2);
+                int height = r.Next(3, 7);
+                int width = height * 2;
+                int fill = r.Next(0, 2);
+                bool fillBool;
+                if (fill == 0) { fillBool = false; }
+                else { fillBool = true; }
+                blocks[i] = new Square(xPos, yPos, Convert.ToString(i), width, height, fillBool);
+            }
 
             // initialise screen
             Screen.InitiateDisplay(".", "/");
@@ -53,14 +64,13 @@ namespace consoleGraphicsDriver
                     string dispData = Convert.ToString($"X:{Math.Round(blobs[i].GetX(), 2)} Y:{Math.Round(blobs[i].GetY(), 2)}");
                     Screen.messageLine(i, Convert.ToString(i), dispData);
                 }
+                for (int i = 0; i < blocks.Length; i++)
+                {
+                    blocks[i].Update(gravity, wind);
+                    blocks[i].HitWalls(winW, winH - 2);
+                    blocks[i].Show();
+                }
 
-                block1.Update(gravity, wind);
-                block1.HitWalls(winW, winH - 2);
-                block1.Show();
-
-                block2.Update(gravity, wind);
-                block2.HitWalls(winW, winH - 2);
-                block2.Show();
 
                 Screen.ScreenArrayToConsoleString();
                 Thread.Sleep(32); // pause main loop - approx 30fps
